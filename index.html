@@ -2,336 +2,118 @@
 <!-- 한국어 설정으로 문서의 기본 언어를 지정합니다 -->
 <html lang="ko">
 <head>
-    <!-- 브라우저 인코딩을 UTF-8로 설정하여 한글 깨짐을 방지합니다 -->
     <meta charset="UTF-8">
-    <!-- 모바일 기기에서도 화면이 최적화되도록 뷰포트를 설정합니다 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 통합 보안 수사본부 V3.2 최종 통합본 제목입니다 -->
-    <title>CERT 통합 보안 수사본부 V3.2</title>
-    <!-- 디자인 생산성을 위해 테일윈드 CSS 프레임워크를 외부 CDN에서 불러옵니다 -->
+    <title>CERT 통합 보안 수사본부 (Real-Engine)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 데이터 시각화를 위한 Chart.js 라이브러리를 외부 CDN에서 불러옵니다 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* 시스템 전체에 노토산스 한글 폰트를 적용합니다 */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
-        
-        body {
-            /* 폰트 패밀리 지정 및 배경색을 세련된 밝은 회색으로 설정합니다 */
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
-            overflow-x: hidden;
-        }
-
-        /* 차트가 부모 요소에 맞춰 유동적으로 크기가 변하도록 컨테이너를 정의합니다 */
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 100%;
-            margin: auto;
-            height: 250px;
-        }
-
-        /* 화면 등장 시 부드럽게 나타나는 애니메이션 효과입니다 */
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .chart-container { position: relative; width: 100%; height: 250px; }
         .fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 커스텀 스크롤바 디자인으로 가독성을 높입니다 */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-        /* 점검 항목 카드에 호버 효과를 주어 인터랙티브함을 더합니다 */
-        .check-item { transition: all 0.2s ease; cursor: pointer; }
+        .check-item { transition: all 0.2s ease; }
         .check-item:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-
-        /* 대응 가이드 영역 애니메이션: 상세 조치 방법 출력용입니다 */
-        .remedy-area { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-        .check-item.active .remedy-area { max-height: 500px; }
-
-        /* 메일 전달 경로(Hop)를 위한 타임라인 스타일입니다 */
-        .mail-hop-node {
-            position: relative;
-            padding-left: 2rem;
-            border-left: 2px dashed #cbd5e1;
-            margin-bottom: 1.5rem;
-        }
-        .mail-hop-node::before {
-            content: '';
-            position: absolute;
-            left: -7px;
-            top: 0;
-            width: 12px;
-            height: 12px;
-            background-color: #6366f1;
-            border-radius: 50%;
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- 통합 헤더: 각 분석 센터로 이동할 수 있는 내비게이션 바입니다 -->
     <header class="bg-slate-900 text-white shadow-xl sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-white">CERT</div>
                 <div>
-                    <h1 class="text-base font-bold leading-tight">CERT 통합 수사본부</h1>
-                    <p class="text-[9px] text-indigo-400 uppercase tracking-widest">Global Threat Intelligence v3.2</p>
+                    <h1 class="text-base font-bold">CERT 통합 수사본부</h1>
+                    <p class="text-[9px] text-indigo-400 uppercase tracking-widest">Real-Time Security Engine</p>
                 </div>
             </div>
-            <!-- 수사본부 내 주요 센터 이동 버튼입니다 -->
             <nav class="hidden md:flex gap-6 text-xs font-bold">
                 <button onclick="app.switchView('analysis')" class="hover:text-indigo-400 transition">분석 센터</button>
-                <button onclick="app.switchView('codec')" class="hover:text-indigo-400 transition">인/디코드 센터</button>
-                <button onclick="app.switchView('system')" class="hover:text-indigo-400 transition">시스템 점검 센터</button>
+                <button onclick="app.switchView('system')" class="hover:text-indigo-400 transition">시스템 점검 (SSH)</button>
             </nav>
             <div class="text-right">
-                <p class="text-[10px] text-slate-500 font-bold">보안 총괄 보좌 중</p>
-                <p class="text-xs text-emerald-400 font-bold">System: Protected</p>
+                <p class="text-[10px] text-slate-500 font-bold">엔진 상태</p>
+                <p class="text-xs text-emerald-400 font-bold">Connected</p>
             </div>
         </div>
     </header>
 
     <main class="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full">
 
-        <!-- 섹션 1: 분석 센터 (파일 및 이메일 정밀 분석) -->
+        <!-- 1. 분석 센터 (파일 & 이메일) -->
         <section id="view-analysis" class="space-y-8 fade-in">
-            <div id="analysis-input-stage" class="grid grid-cols-1 lg:grid-cols-2 gap-8 my-10">
-                <!-- 파일 분석 입력 영역입니다 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 my-10">
+                <!-- 파일 분석 -->
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">📂 엔드포인트 분석</h3>
-                    <input type="file" id="file-input" class="hidden" onchange="app.handleFileSelect(event)">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">📂 파일 정밀 분석 (PE/Hash)</h3>
+                    <input type="file" id="file-input" class="hidden" onchange="app.uploadFile(this.files[0])">
                     <div id="file-drop-zone" class="border-2 border-dashed border-slate-100 bg-slate-50 rounded-2xl p-10 text-center cursor-pointer hover:bg-indigo-50 transition" onclick="document.getElementById('file-input').click()">
-                        <p class="text-sm text-slate-500 font-bold">악성 의심 파일을 업로드하세요 (Click or Drop)</p>
-                        <p class="text-[10px] text-slate-300 mt-2">분석기 가동 준비 완료</p>
+                        <p class="text-sm text-slate-500 font-bold">분석할 파일을 업로드하세요</p>
+                        <p class="text-[10px] text-slate-400 mt-2">실제 MD5/SHA256 해시 및 PE 구조 분석</p>
                     </div>
+                    <div id="file-result" class="hidden mt-4 p-4 bg-slate-50 rounded-xl text-xs font-mono"></div>
                 </div>
-                <!-- 이메일 헤더 분석 입력 영역입니다 -->
+                <!-- 이메일 분석 -->
                 <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
                     <h3 class="text-lg font-bold mb-4 flex items-center gap-2">📧 이메일 헤더 분석</h3>
-                    <textarea id="email-header-input" class="w-full h-24 p-4 bg-slate-50 border border-slate-100 rounded-xl text-xs font-mono mb-4 outline-none focus:ring-2 focus:ring-indigo-500" placeholder="이메일 헤더 전문을 붙여넣으세요..."></textarea>
-                    <button onclick="app.startEmailAnalysis()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition">헤더 분석 시작</button>
-                </div>
-            </div>
-
-            <!-- 분석 로딩 화면입니다 -->
-            <div id="analysis-loader-stage" class="hidden py-20 text-center">
-                <div class="w-20 h-20 border-8 border-slate-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-8"></div>
-                <h3 class="text-xl font-black text-slate-800 mb-2" id="analysis-loader-title">데이터 분석 중...</h3>
-                <p class="text-slate-500 text-sm" id="analysis-loader-status">가상 샌드박스 초기화 및 레코드 조회 중</p>
-            </div>
-
-            <!-- 분석 결과 대시보드입니다 -->
-            <div id="analysis-result-stage" class="hidden space-y-8">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="md:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between">
-                        <div class="flex items-center gap-5">
-                            <div class="w-16 h-16 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center text-4xl font-bold border border-rose-100 animate-pulse">!</div>
-                            <div>
-                                <h2 class="text-2xl font-black text-slate-800" id="analysis-verdict-title">위협 탐지: 고위험(High)</h2>
-                                <p class="text-slate-500 text-xs" id="analysis-verdict-target">분석 대상: --</p>
-                            </div>
-                        </div>
-                        <div class="text-center bg-rose-50 px-6 py-2 rounded-2xl border border-rose-100">
-                            <p class="text-[10px] text-rose-400 font-bold uppercase">위험 지수</p>
-                            <p class="text-3xl font-black text-rose-600">92</p>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 flex flex-col items-center justify-center">
-                        <div class="chart-container" style="height: 140px;">
-                            <canvas id="gaugeChart"></canvas>
-                        </div>
-                        <p class="text-xs font-black text-slate-400 mt-2 uppercase">Risk Index</p>
-                    </div>
-                </div>
-
-                <!-- 탭 메뉴입니다 -->
-                <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                    <button onclick="app.switchTab('email')" id="tab-email" class="px-6 py-2.5 bg-indigo-600 text-white rounded-full text-sm font-bold shadow-md whitespace-nowrap">📧 이메일 분석</button>
-                    <button onclick="app.switchTab('network')" id="tab-network" class="px-6 py-2.5 bg-white text-slate-500 rounded-full text-sm font-bold border border-slate-200 whitespace-nowrap">🌐 네트워크 활동</button>
-                    <button onclick="app.switchTab('system-log')" id="tab-system-log" class="px-6 py-2.5 bg-white text-slate-500 rounded-full text-sm font-bold border border-slate-200 whitespace-nowrap">📂 시스템 행위</button>
-                    <button onclick="app.switchTab('cert-report')" id="tab-cert-report" class="px-6 py-2.5 bg-white text-slate-500 rounded-full text-sm font-bold border border-slate-200 whitespace-nowrap">📋 최종 리포트</button>
-                </div>
-
-                <!-- 탭 콘텐츠: 이메일 분석 -->
-                <div id="content-email" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-2 space-y-6">
-                        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                            <h3 class="font-bold text-slate-800 mb-6">📡 전달 경로 (Relay Path)</h3>
-                            <div id="mail-hop-container" class="space-y-1"></div>
-                        </div>
-                        <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden text-xs">
-                            <div class="p-4 bg-slate-50 border-b border-slate-200 font-bold">헤더 상세 데이터</div>
-                            <div id="header-data-table" class="divide-y divide-slate-100"></div>
-                        </div>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                        <h3 class="font-bold text-slate-800 mb-6">인증 프로토콜 검증</h3>
-                        <div class="chart-container"><canvas id="authChart"></canvas></div>
-                        <div id="auth-status-list" class="mt-6 space-y-3"></div>
-                    </div>
-                </div>
-
-                <!-- 탭 콘텐츠: 네트워크 활동 -->
-                <div id="content-network" class="hidden tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="p-5 bg-slate-50 border-b border-slate-200 font-bold">네트워크 커넥션 로그</div>
-                        <table class="w-full text-xs text-left">
-                            <thead class="bg-slate-50 text-slate-400 font-bold border-b border-slate-100">
-                                <tr><th class="px-6 py-4">프로세스</th><th class="px-6 py-4">원격 주소</th><th class="px-6 py-4">포트</th><th class="px-6 py-4">상태</th></tr>
-                            </thead>
-                            <tbody id="net-table-body" class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                        <h3 class="font-bold text-slate-800 mb-6">트래픽 추이</h3>
-                        <div class="chart-container"><canvas id="trafficLineChart"></canvas></div>
-                    </div>
-                </div>
-
-                <!-- 탭 콘텐츠: 시스템 행위 -->
-                <div id="content-system-log" class="hidden tab-content">
-                    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                        <div class="p-5 bg-slate-50 border-b border-slate-200 font-bold">시스템 호출 로그 (Procmon)</div>
-                        <div id="sys-log-list" class="max-h-[500px] overflow-y-auto custom-scrollbar"></div>
-                    </div>
-                </div>
-
-                <!-- 탭 콘텐츠: CERT 리포트 -->
-                <div id="content-cert-report" class="hidden tab-content">
-                    <div class="bg-slate-900 text-white rounded-3xl p-10 shadow-2xl relative overflow-hidden">
-                        <div class="absolute -top-10 -right-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl"></div>
-                        <div class="relative z-10 space-y-6">
-                            <h3 class="text-3xl font-black">CERT 통합 분석 보고서</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div class="bg-white/5 p-6 rounded-2xl border border-white/10">
-                                    <h4 class="font-bold text-rose-400 mb-4 uppercase text-sm">위협 결론</h4>
-                                    <ul id="report-verdict-list" class="space-y-3 text-sm text-slate-300"></ul>
-                                </div>
-                                <div class="bg-white/5 p-6 rounded-2xl border border-white/10">
-                                    <h4 class="font-bold text-emerald-400 mb-4 uppercase text-sm">대응 가이드</h4>
-                                    <ul id="report-guide-list" class="space-y-3 text-sm text-slate-300"></ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <textarea id="email-header-input" class="w-full h-32 p-4 bg-slate-50 border border-slate-100 rounded-xl text-xs font-mono mb-4 outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Received 헤더를 포함한 원문..."></textarea>
+                    <button onclick="app.analyzeEmail()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition">헤더 파싱 및 경로 추적</button>
+                    <div id="email-result" class="hidden mt-4 p-4 bg-slate-50 rounded-xl text-xs font-mono h-40 overflow-y-auto custom-scrollbar"></div>
                 </div>
             </div>
         </section>
 
-        <!-- 섹션 2: 인/디코드 센터 -->
-        <section id="view-codec" class="hidden space-y-6 fade-in">
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-                    <div>
-                        <h2 class="text-2xl font-black text-slate-800">인/디코드 유틸리티</h2>
-                        <p class="text-slate-500 text-xs">멀티 코덱을 통한 데이터 정밀 해독 도구입니다.</p>
-                    </div>
-                    <div class="flex bg-slate-100 p-1 rounded-xl">
-                        <button onclick="codec.setMode('decode')" id="mode-decode" class="px-4 py-2 bg-white rounded-lg text-xs font-bold shadow-sm transition text-slate-800">Decode</button>
-                        <button onclick="codec.setMode('encode')" id="mode-encode" class="px-4 py-2 text-slate-500 text-xs font-bold transition">Encode</button>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="space-y-4">
-                        <label class="text-xs font-bold text-slate-400 uppercase">Input Data</label>
-                        <textarea id="codec-input" class="w-full h-64 p-6 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-mono outline-none" placeholder="변환할 데이터를 입력하세요..."></textarea>
-                    </div>
-                    <div class="space-y-6">
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <button onclick="codec.run('url')" class="p-3 bg-slate-100 rounded-xl text-[11px] font-bold hover:bg-indigo-600 hover:text-white transition">URL</button>
-                            <button onclick="codec.run('base64')" class="p-3 bg-slate-100 rounded-xl text-[11px] font-bold hover:bg-indigo-600 hover:text-white transition">Base64</button>
-                            <button onclick="codec.run('hex')" class="p-3 bg-slate-100 rounded-xl text-[11px] font-bold hover:bg-indigo-600 hover:text-white transition">HEX</button>
-                            <button onclick="codec.run('charcode')" class="p-3 bg-slate-100 rounded-xl text-[11px] font-bold hover:bg-indigo-600 hover:text-white transition">CharCode</button>
-                            <button onclick="codec.run('gubun')" class="p-3 bg-slate-100 rounded-xl text-[11px] font-bold hover:bg-indigo-600 hover:text-white transition">Gubun</button>
-                            <button onclick="codec.clear()" class="p-3 bg-rose-50 text-rose-600 rounded-xl text-[11px] font-bold">Clear</button>
-                        </div>
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-slate-400 uppercase">Output Result</label>
-                            <div id="codec-output" class="w-full h-44 p-6 bg-slate-900 text-emerald-400 rounded-2xl text-sm font-mono overflow-y-auto whitespace-pre-wrap"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 섹션 3: 시스템 점검 센터 -->
+        <!-- 2. 시스템 점검 센터 (Real SSH) -->
         <section id="view-system" class="hidden space-y-6 fade-in">
             <div class="bg-indigo-900 text-white p-10 rounded-3xl shadow-2xl relative overflow-hidden mb-8">
                 <div class="absolute -top-10 -right-10 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
                 <div class="relative z-10">
-                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-                        <div class="space-y-3">
-                            <h2 class="text-3xl font-black">시스템 보안 정밀 진단</h2>
-                            <p class="text-indigo-200 text-sm max-w-lg">대상 IP를 연결하여 10대 핵심 보안 항목을 전수 조사합니다.</p>
+                    <h2 class="text-3xl font-black mb-2">시스템 원격 진단 (SSH)</h2>
+                    <p class="text-indigo-200 text-sm mb-6">대상 서버에 직접 SSH로 접속하여 보안 설정을 점검합니다.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-4xl bg-white/10 p-6 rounded-2xl border border-white/20 backdrop-blur-md">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase text-indigo-300">Target Host</label>
+                            <input type="text" id="ssh-host" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-indigo-300 outline-none" placeholder="192.168.1.100">
                         </div>
-                        <!-- 시스템 연결 가이드 보기 버튼 -->
-                        <button onclick="system.showGuide()" class="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 rounded-lg text-xs font-bold transition">
-                            ❓ 연결 방법 안내 (Guide)
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase text-indigo-300">Port</label>
+                            <input type="number" id="ssh-port" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-indigo-300 outline-none" value="22">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase text-indigo-300">Username</label>
+                            <input type="text" id="ssh-user" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-indigo-300 outline-none" placeholder="root">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-bold uppercase text-indigo-300">Password (Optional)</label>
+                            <input type="password" id="ssh-pass" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-indigo-300 outline-none" placeholder="********">
+                        </div>
+                        <div class="col-span-2 space-y-2">
+                            <label class="text-[10px] font-bold uppercase text-indigo-300">Private Key (Optional, PEM format)</label>
+                            <textarea id="ssh-key" class="w-full h-20 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-indigo-300 outline-none text-xs font-mono" placeholder="-----BEGIN RSA PRIVATE KEY-----..."></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button onclick="app.runSystemCheck()" id="btn-check" class="px-8 py-3 bg-emerald-500 text-white rounded-xl font-black shadow-lg hover:bg-emerald-600 transition active:scale-95">
+                            실제 연결 및 진단 시작
                         </button>
                     </div>
-                    
-                    <div id="system-target-zone" class="mt-8 flex flex-col md:flex-row gap-4 max-w-2xl bg-white/10 p-6 rounded-2xl border border-white/20 backdrop-blur-md">
-                        <div class="flex-grow space-y-2">
-                            <label class="text-[10px] font-bold uppercase text-indigo-300">Target IP / Hostname</label>
-                            <input type="text" id="system-target-ip" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-indigo-300 outline-none" placeholder="예: 192.168.0.100">
-                        </div>
-                        <button onclick="system.connect()" id="btn-system-connect" class="px-8 py-3 bg-emerald-500 text-white rounded-xl font-black shadow-lg hover:bg-emerald-600 transition self-end">연결 및 진단</button>
-                    </div>
-
-                    <div id="system-connect-status" class="hidden mt-6 flex items-center gap-3">
-                        <div class="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></div>
-                        <p class="text-xs font-mono text-emerald-300" id="system-status-text">SSH 세션 수립 중...</p>
-                    </div>
                 </div>
             </div>
 
-            <!-- 연결 가이드 모달/영역 -->
-            <div id="system-guide-area" class="hidden bg-white p-8 rounded-3xl shadow-sm border border-indigo-100 mb-8 fade-in">
-                <h3 class="text-lg font-bold text-indigo-900 mb-4 flex items-center gap-2">🛡️ 시스템 연결 유형 및 가이드</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs leading-relaxed">
-                    <div class="p-4 bg-slate-50 rounded-2xl">
-                        <p class="font-bold text-indigo-600 mb-2">1. SSH 연결 (Linux/Network)</p>
-                        <p class="text-slate-500">대상 시스템의 22번 포트가 개방되어 있어야 하며, root 권한 또는 sudo 권한을 가진 계정 정보가 필요합니다.</p>
-                    </div>
-                    <div class="p-4 bg-slate-50 rounded-2xl">
-                        <p class="font-bold text-indigo-600 mb-2">2. WMI 연결 (Windows Remote)</p>
-                        <p class="text-slate-500">윈도우 원격 관리(WinRM) 서비스가 가동 중이어야 하며, 135, 445 포트 접근이 허용되어야 합니다.</p>
-                    </div>
-                    <div class="p-4 bg-slate-50 rounded-2xl">
-                        <p class="font-bold text-indigo-600 mb-2">3. Local Agent (권장)</p>
-                        <p class="text-slate-500">점검 대상 PC에서 직접 CERT 에이전트 스크립트를 실행하여 가장 정확하고 상세한 데이터를 수집합니다.</p>
-                    </div>
+            <!-- 진단 결과 -->
+            <div id="system-result-area" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-4">
+                    <h3 class="font-bold text-slate-800">진단 결과 리포트</h3>
+                    <div id="check-list-container" class="space-y-4"></div>
                 </div>
-                <button onclick="system.hideGuide()" class="mt-6 text-indigo-600 font-bold text-xs hover:underline">가이드 닫기</button>
-            </div>
-
-            <div id="system-result" class="hidden space-y-8">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-2 space-y-4">
-                        <div class="flex justify-between items-center px-2 mb-4">
-                            <h3 class="font-bold text-slate-800">10대 핵심 보안 점검 결과</h3>
-                            <div class="flex gap-3 text-[10px] font-bold">
-                                <span class="bg-emerald-100 text-emerald-600 px-2 py-1 rounded text-xs">양호: <span id="count-safe">0</span></span>
-                                <span class="bg-rose-100 text-rose-600 px-2 py-1 rounded text-xs">취약: <span id="count-vuln">0</span></span>
-                            </div>
-                        </div>
-                        <div id="check-list-container" class="space-y-4"></div>
-                    </div>
-                    <div class="space-y-6">
-                        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 text-center">
-                            <h4 class="text-xs font-bold text-slate-400 uppercase mb-4">종합 보안 점수</h4>
-                            <div class="chart-container" style="height: 180px;"><canvas id="systemScoreChart"></canvas></div>
-                            <p class="text-3xl font-black text-slate-800 mt-4" id="system-total-score">--</p>
-                        </div>
-                        <div class="bg-slate-900 text-white p-6 rounded-3xl shadow-xl border border-slate-800">
-                            <h4 class="text-xs font-bold text-indigo-400 uppercase mb-4">CERT 총괄 처방전</h4>
-                            <p id="system-advice" class="text-xs leading-relaxed italic text-slate-300">대상 연결 후 진단하십시오.</p>
-                        </div>
+                <div class="space-y-6">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-200 text-center">
+                        <h4 class="text-xs font-bold text-slate-400 uppercase mb-4">보안 점수</h4>
+                        <p class="text-5xl font-black text-slate-800" id="system-score">--</p>
                     </div>
                 </div>
             </div>
@@ -340,220 +122,135 @@
     </main>
 
     <script>
-        // ---------------------------------------------------------
-        // 전역 앱 관리자 (분석 센터)
-        // ---------------------------------------------------------
         const app = {
-            state: { 
-                currentView: 'analysis',
-                currentTab: 'email',
-                targetFile: '',
-                isAnalyzing: false
-            },
-            
-            init: function() {
-                const dropZone = document.getElementById('file-drop-zone');
-                if(!dropZone) return;
-                dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('bg-indigo-50'); });
-                dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('bg-indigo-50'); });
-                dropZone.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    dropZone.classList.remove('bg-indigo-50');
-                    const file = e.dataTransfer.files[0];
-                    if(file) { this.state.targetFile = file.name; this.simulateAnalysis('file'); }
-                });
-            },
-
+            // 뷰 전환
             switchView: function(viewId) {
                 document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
                 document.getElementById(`view-${viewId}`).classList.remove('hidden');
-                this.state.currentView = viewId;
             },
 
-            handleFileSelect: function(event) {
-                const file = event.target.files[0];
-                if(file) { this.state.targetFile = file.name; this.simulateAnalysis('file'); }
-            },
+            // 1. 파일 분석 (Real API)
+            uploadFile: async function(file) {
+                if(!file) return;
+                const formData = new FormData();
+                formData.append("file", file);
 
-            startEmailAnalysis: function() {
-                const header = document.getElementById('email-header-input').value;
-                if(!header && !confirm("헤더가 비어있습니다. 샘플 데이터를 분석할까요?")) return;
-                this.state.targetFile = "수사대상_이메일_헤더.eml";
-                this.simulateAnalysis('email');
-            },
+                document.getElementById('file-result').classList.remove('hidden');
+                document.getElementById('file-result').innerHTML = "⏳ 파일 업로드 및 분석 중...";
 
-            simulateAnalysis: function(type) {
-                if(this.state.isAnalyzing) return;
-                this.state.isAnalyzing = true;
-                document.getElementById('analysis-input-stage').classList.add('hidden');
-                document.getElementById('analysis-loader-stage').classList.remove('hidden');
-                
-                let progress = 0;
-                const int = setInterval(() => {
-                    progress += 5;
-                    if(progress >= 100) { clearInterval(int); this.showAnalysisResult(); }
-                }, 50);
-            },
-
-            showAnalysisResult: function() {
-                this.state.isAnalyzing = false;
-                document.getElementById('analysis-loader-stage').classList.add('hidden');
-                document.getElementById('analysis-result-stage').classList.remove('hidden');
-                document.getElementById('analysis-verdict-target').textContent = `분석 대상: ${this.state.targetFile}`;
-                this.renderAnalysisData();
-                this.initAnalysisCharts();
-            },
-
-            switchTab: function(tabId) {
-                this.state.currentTab = tabId;
-                const tabs = ['email', 'network', 'system-log', 'cert-report'];
-                tabs.forEach(t => {
-                    const btn = document.getElementById(`tab-${t}`);
-                    const content = document.getElementById(`content-${t}`);
-                    if(t === tabId) {
-                        btn.classList.add('bg-indigo-600', 'text-white');
-                        btn.classList.remove('bg-white', 'text-slate-500');
-                        content.classList.remove('hidden');
-                        content.classList.add('fade-in');
-                    } else {
-                        btn.classList.remove('bg-indigo-600', 'text-white');
-                        btn.classList.add('bg-white', 'text-slate-500');
-                        content.classList.add('hidden');
-                    }
-                });
-            },
-
-            renderAnalysisData: function() {
-                // 더미 데이터 렌더링 (이전 복구)
-                const hops = [ { l: "최종 목적지", d: "우리 메일 서버 (10.0.1.5)" }, { l: "중간 게이트웨이", d: "relay.attacker-site.ru (185.x.x.x)", danger: true } ];
-                document.getElementById('mail-hop-container').innerHTML = hops.map(h => `
-                    <div class="mail-hop-node ${h.danger ? 'border-none' : ''}">
-                        <p class="text-xs font-bold ${h.danger ? 'text-rose-600' : 'text-slate-700'}">${h.l}</p>
-                        <p class="text-[10px] text-slate-400">${h.d}</p>
-                    </div>
-                `).join('');
-
-                const netData = [ { p: this.state.targetFile, r: "193.161.x.x", po: "4444", s: "ESTABLISHED" } ];
-                document.getElementById('net-table-body').innerHTML = netData.map(d => `
-                    <tr><td class="px-6 py-4 font-bold">${d.p}</td><td class="px-6 py-4 font-mono text-rose-600">${d.r}</td><td class="px-6 py-4">${d.po}</td><td class="px-6 py-4 text-emerald-600 font-bold">${d.s}</td></tr>
-                `).join('');
-
-                document.getElementById('sys-log-list').innerHTML = `<div class="p-4 border-b text-[11px] font-mono text-slate-500">11:02:15 - CreateFile: C:\\Windows\\Temp\\~payload.tmp (SUCCESS)</div>`;
-                document.getElementById('report-verdict-list').innerHTML = `<li>- 발신자 위조 피싱 메일 감지</li><li>- C2 서버와의 비정상 세션 유지</li>`;
-                document.getElementById('report-guide-list').innerHTML = `<li>- 해당 IP 및 도메인 즉시 차단</li><li>- 침해 단말 네트워크 격리</li>`;
-            },
-
-            initAnalysisCharts: function() {
-                new Chart(document.getElementById('gaugeChart'), { type: 'doughnut', data: { datasets: [{ data: [92, 8], backgroundColor: ['#e11d48', '#f1f5f9'], borderWidth: 0, circumference: 180, rotation: 270 }] }, options: { cutout: '85%', plugins: { legend: { display: false } } } });
-                new Chart(document.getElementById('authChart'), { type: 'doughnut', data: { labels: ['FAIL', 'NONE'], datasets: [{ data: [2, 1], backgroundColor: ['#f43f5e', '#94a3b8'] }] }, options: { plugins: { legend: { position: 'bottom' } } } });
-                new Chart(document.getElementById('trafficLineChart'), { type: 'line', data: { labels: ['0s', '5s', '10s', '15s'], datasets: [{ label: 'KB/s', data: [2, 5, 450, 15], borderColor: '#6366f1', fill: true, backgroundColor: 'rgba(99, 102, 241, 0.1)', tension: 0.4 }] }, options: { plugins: { legend: { display: false } }, scales: { y: { display: false } } } });
-            }
-        };
-
-        // ---------------------------------------------------------
-        // 코덱 센터 로직
-        // ---------------------------------------------------------
-        const codec = {
-            mode: 'decode',
-            setMode: function(m) {
-                this.mode = m;
-                document.getElementById('mode-decode').className = m === 'decode' ? "px-4 py-2 bg-white rounded-lg text-xs font-bold shadow-sm transition text-slate-800" : "px-4 py-2 text-slate-500 text-xs font-bold transition";
-                document.getElementById('mode-encode').className = m === 'encode' ? "px-4 py-2 bg-white rounded-lg text-xs font-bold shadow-sm transition text-slate-800" : "px-4 py-2 text-slate-500 text-xs font-bold transition";
-            },
-            run: function(type) {
-                const input = document.getElementById('codec-input').value;
-                if(!input) return alert("데이터를 입력하세요!");
-                let res = "";
                 try {
-                    if(type === 'url') res = this.mode === 'decode' ? decodeURIComponent(input) : encodeURIComponent(input);
-                    else if(type === 'base64') res = this.mode === 'decode' ? atob(input) : btoa(input);
-                    else if(type === 'hex') {
-                        if(this.mode === 'decode') res = input.match(/.{1,2}/g).map(h => String.fromCharCode(parseInt(h, 16))).join('');
-                        else res = Array.from(input).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
-                    }
-                    else if(type === 'charcode') {
-                        if(this.mode === 'decode') res = input.split(/[\s,]+/).map(c => String.fromCharCode(parseInt(c))).join('');
-                        else res = Array.from(input).map(c => c.charCodeAt(0)).join(', ');
-                    }
-                    else if(type === 'gubun') res = input.split('\n').map(l => l.substring(10, 61).trim()).join('\n');
-                } catch(e) { res = "Error: " + e.message; }
-                document.getElementById('codec-output').textContent = res;
-            },
-            clear: function() { document.getElementById('codec-input').value = ""; document.getElementById('codec-output').textContent = ""; }
-        };
-
-        // ---------------------------------------------------------
-        // 시스템 점검 센터 로직
-        // ---------------------------------------------------------
-        const system = {
-            checkItems: [
-                { id: 1, cat: "계정", title: "Guest 계정 상태", result: "취약", score: 0, guide: " Guest 계정을 '비활성화' 처리하거나 'net user guest /active:no'를 실행하십시오." },
-                { id: 2, cat: "계정", title: "관리자 계정명 변경", result: "양호", score: 100, guide: "기본 관리자 계정명(Administrator)을 추측이 어려운 이름으로 변경하십시오." },
-                { id: 3, cat: "암호", title: "최소 암호 길이", result: "취약", score: 0, guide: "보안 정책에서 '최소 암호 길이'를 8자 이상으로 강제 설정하십시오." },
-                { id: 4, cat: "암호", title: "암호 복잡성 정책", result: "양호", score: 100, guide: "영문/숫자/특수문자 조합 사용 설정을 유지하십시오." },
-                { id: 5, cat: "네트워크", title: "기본 공유 제거", result: "취약", score: 0, guide: "C$, ADMIN$ 등의 관리 목적 공유 폴더를 레지스트리 설정을 통해 제거하십시오." },
-                { id: 6, cat: "네트워크", title: "RDP 보안 설정", result: "취약", score: 0, guide: "원격 데스크톱 접속 시 '네트워크 수준 인증(NLA)'을 강제하십시오." },
-                { id: 7, cat: "서비스", title: "Telnet 서비스 중지", result: "양호", score: 100, guide: "보안이 취약한 Telnet 서비스를 중지하거나 제거하십시오." },
-                { id: 8, cat: "서비스", title: "익명 FTP 허용 여부", result: "양호", score: 100, guide: "FTP 서버의 익명 연결(Anonymous)을 금지하십시오." },
-                { id: 9, cat: "업데이트", title: "자동 업데이트 설정", result: "취약", score: 0, guide: "윈도우 업데이트가 항상 최신 상태로 자동 설치되도록 설정하십시오." },
-                { id: 10, cat: "단말", title: "화면 보호기 암호", result: "양호", score: 100, guide: "자리 비움 시 즉시 암호 잠금이 되도록 설정하십시오." }
-            ],
-
-            showGuide: function() { document.getElementById('system-guide-area').classList.remove('hidden'); },
-            hideGuide: function() { document.getElementById('system-guide-area').classList.add('hidden'); },
-
-            connect: function() {
-                const ip = document.getElementById('system-target-ip').value;
-                if(!ip) return alert("대상 IP를 입력하세요!");
-                document.getElementById('system-connect-status').classList.remove('hidden');
-                document.getElementById('btn-system-connect').disabled = true;
-                setTimeout(() => { this.runCheck(); }, 2000);
+                    const response = await fetch('/api/analyze/file', { method: 'POST', body: formData });
+                    const data = await response.json();
+                    
+                    let html = `<p class="font-bold text-indigo-600">파일명: ${data.filename}</p>`;
+                    html += `<p>크기: ${data.size} bytes</p>`;
+                    html += `<p>MD5: <span class="text-slate-500">${data.md5}</span></p>`;
+                    html += `<p>SHA256: <span class="text-slate-500">${data.sha256}</span></p>`;
+                    html += `<p class="mt-2 font-bold ${data.verdict.includes('Safe') ? 'text-emerald-500' : 'text-rose-500'}">판정: ${data.verdict}</p>`;
+                    if(data.details) html += `<p class="text-slate-400 mt-1">> ${data.details}</p>`;
+                    
+                    document.getElementById('file-result').innerHTML = html;
+                } catch(e) {
+                    document.getElementById('file-result').innerHTML = `❌ 분석 실패: ${e.message}`;
+                }
             },
 
-            runCheck: function() {
-                document.getElementById('system-connect-status').classList.add('hidden');
-                document.getElementById('system-result').classList.remove('hidden');
-                const container = document.getElementById('check-list-container');
-                container.innerHTML = "";
-                let total = 0, safe = 0, vuln = 0;
+            // 2. 이메일 분석 (Real API)
+            analyzeEmail: async function() {
+                const text = document.getElementById('email-header-input').value;
+                if(!text) return alert("헤더를 입력하세요.");
 
-                this.checkItems.forEach((item, idx) => {
-                    total += item.score;
-                    if(item.score === 100) safe++; else vuln++;
-                    const div = document.createElement('div');
-                    div.className = "bg-white rounded-2xl border border-slate-200 check-item overflow-hidden fade-in";
-                    div.onclick = function() { this.classList.toggle('active'); };
-                    div.innerHTML = `
-                        <div class="p-6 flex justify-between items-center">
-                            <div>
-                                <span class="text-[9px] font-black px-2 py-0.5 rounded ${item.score === 100 ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">${item.cat}</span>
-                                <h4 class="font-bold text-slate-800 text-sm mt-1">${item.title}</h4>
+                document.getElementById('email-result').classList.remove('hidden');
+                document.getElementById('email-result').innerHTML = "⏳ 헤더 파싱 중...";
+
+                try {
+                    const response = await fetch('/api/analyze/email', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({header_text: text})
+                    });
+                    const data = await response.json();
+
+                    let html = `<p><strong>Subject:</strong> ${data.subject}</p>`;
+                    html += `<p><strong>From:</strong> ${data.from}</p>`;
+                    html += `<p><strong>Auth:</strong> ${data.auth_status}</p>`;
+                    html += `<hr class="my-2 border-slate-200">`;
+                    html += `<p class="font-bold mb-1">경로 추적 (Hops):</p>`;
+                    data.hops.forEach(h => {
+                        html += `<div class="mb-1 pl-2 border-l-2 border-indigo-200">`;
+                        html += `<p class="text-indigo-600 font-bold">${h.ips.join(', ')}</p>`;
+                        html += `<p class="text-[10px] text-slate-400 truncate">${h.raw}</p></div>`;
+                    });
+
+                    document.getElementById('email-result').innerHTML = html;
+                } catch(e) {
+                    document.getElementById('email-result').innerHTML = `❌ 분석 실패: ${e.message}`;
+                }
+            },
+
+            // 3. 시스템 점검 (Real SSH)
+            runSystemCheck: async function() {
+                const host = document.getElementById('ssh-host').value;
+                const port = document.getElementById('ssh-port').value;
+                const user = document.getElementById('ssh-user').value;
+                const pass = document.getElementById('ssh-pass').value;
+                const key = document.getElementById('ssh-key').value;
+
+                if(!host || !user) return alert("접속 정보를 입력하세요.");
+
+                const btn = document.getElementById('btn-check');
+                btn.disabled = true;
+                btn.innerHTML = "⏳ 접속 및 스크립트 실행 중...";
+                document.getElementById('system-result-area').classList.add('hidden');
+
+                try {
+                    const response = await fetch('/api/system/check', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            host: host, port: parseInt(port), username: user, 
+                            password: pass || null, private_key: key || null
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if(response.status !== 200) throw new Error(data.error || "연결 실패");
+
+                    // 결과 렌더링
+                    document.getElementById('system-result-area').classList.remove('hidden');
+                    document.getElementById('system-score').innerText = data.score;
+                    
+                    const container = document.getElementById('check-list-container');
+                    container.innerHTML = "";
+                    
+                    data.results.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = "bg-white p-4 rounded-xl border border-slate-200 shadow-sm";
+                        div.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500">${item.cat}</span>
+                                    <h4 class="font-bold text-slate-800 mt-1">${item.title}</h4>
+                                    <p class="text-xs text-slate-500 mt-1">${item.desc}</p>
+                                </div>
+                                <span class="text-xs font-bold ${item.result === '양호' ? 'text-emerald-500' : 'text-rose-500'}">${item.result}</span>
                             </div>
-                            <span class="text-xs font-bold ${item.score === 100 ? 'text-emerald-500' : 'text-rose-500'}">${item.result}</span>
-                        </div>
-                        <div class="remedy-area bg-slate-50 border-t border-slate-100">
-                            <div class="p-6"><p class="text-xs font-bold text-indigo-600 mb-1">🛡️ 조치 방법</p><p class="text-[11px] text-slate-600">${item.guide}</p></div>
-                        </div>
-                    `;
-                    container.appendChild(div);
-                });
+                            <div class="mt-3 p-3 bg-indigo-50 rounded-lg text-[11px] text-indigo-700">
+                                💡 <strong>가이드:</strong> ${item.guide}
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
 
-                document.getElementById('count-safe').innerText = safe;
-                document.getElementById('count-vuln').innerText = vuln;
-                const score = Math.round(total/10);
-                document.getElementById('system-total-score').innerText = score + "점";
-                document.getElementById('system-advice').innerText = score < 80 ? "보안이 취약합니다! 처방전을 확인하여 즉시 조치하십시오." : "훌륭합니다! 지금의 보안 상태를 유지하십시오.";
-                this.initScoreChart(score);
-            },
-
-            initScoreChart: function(score) {
-                const ctx = document.getElementById('systemScoreChart').getContext('2d');
-                if(window.sysChart) window.sysChart.destroy();
-                window.sysChart = new Chart(ctx, { type: 'doughnut', data: { datasets: [{ data: [score, 100-score], backgroundColor: [score < 70 ? '#e11d48' : '#10b981', '#f1f5f9'], borderWidth: 0, circumference: 180, rotation: 270 }] }, options: { cutout: '80%', plugins: { legend: { display: false } } } });
+                } catch(e) {
+                    alert("오류 발생: " + e.message);
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = "실제 연결 및 진단 시작";
+                }
             }
         };
-
-        window.onload = () => { app.init(); console.log("CERT Integrated Headquarters V3.2 Online."); };
     </script>
 </body>
 </html>

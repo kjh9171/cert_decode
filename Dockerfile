@@ -1,11 +1,23 @@
-# 가볍고 보안에 강한 Nginx Alpine 이미지를 기반으로 사용합니다
-FROM nginx:alpine
+# 경량화된 파이썬 이미지 사용
+FROM python:3.9-slim
 
-# 우리가 작성한 index.html 파일을 Nginx의 웹 루트 디렉토리로 복사합니다
-COPY index.html /usr/share/nginx/html/index.html
+# 작업 디렉토리 설정
+WORKDIR /app
 
-# Nginx가 80번 포트에서 요청을 대기하도록 설정합니다
-EXPOSE 80
+# 필요한 패키지 설치를 위한 requirements.txt 복사
+COPY requirements.txt .
 
-# Nginx 서버를 백그라운드가 아닌 포어그라운드에서 실행하여 컨테이너가 유지되도록 합니다
-CMD ["nginx", "-g", "daemon off;"]
+# 패키지 설치
+RUN pip install --no-cache-dir -r requirements.txt
+
+# 애플리케이션 코드 복사
+COPY main.py .
+# 정적 파일(HTML 등)을 위한 디렉토리 생성 및 복사
+RUN mkdir static
+COPY index.html static/
+
+# FastAPI 기본 포트 노출
+EXPOSE 8000
+
+# 서버 실행 (메인 앱)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
