@@ -10,14 +10,12 @@ COPY requirements.txt .
 # 패키지 설치
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 애플리케이션 코드 복사
+# 애플리케이션 코드 및 정적 파일 디렉토리 전체 복사
 COPY main.py .
-# 정적 파일(HTML 등)을 위한 디렉토리 생성 및 복사
-RUN mkdir static
-COPY index.html static/
+COPY static/ ./static/
 
 # FastAPI 기본 포트 노출
 EXPOSE 8000
 
-# 서버 실행 (메인 앱)
+# 서버 실행
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
