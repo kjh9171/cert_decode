@@ -1,9 +1,28 @@
 version: '3.8'
 
 services:
-  mal-analyzer:
-    build: .
-    container_name: cert-intel-platform
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
     ports:
-      - "8080:8000" # 호스트 8080 -> 컨테이너 8000 (FastAPI)
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./static:/app/static
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
     restart: always
