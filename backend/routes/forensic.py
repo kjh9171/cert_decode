@@ -1,11 +1,15 @@
 from fastapi import APIRouter, Body
-from backend.services.forensic_service import decode_forensic_data
+from backend.services.forensic_service import process_forensic_data
 
 router = APIRouter()
 
-@router.post("/decode")
-async def decode_data(data_type: str = Body(...), raw_data: str = Body(...)):
+@router.post("/process")
+async def process_data(
+    data_type: str = Body(...), 
+    raw_data: str = Body(...), 
+    action: str = Body("decode")
+):
     """
-    포렌식 데이터를 디코딩하고 AI 설명을 제공합니다.
+    포렌식 데이터를 처리(인코딩/디코딩)하고 AI 설명을 제공합니다.
     """
-    return decode_forensic_data(data_type, raw_data)
+    return process_forensic_data(data_type, raw_data, action)

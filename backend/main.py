@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routes import system, analyze, forensic, admin
+from backend.routes import system, analyze, forensic, admin, report
 
 app = FastAPI(title="NTAV SecuLab V2.0", description="Never Trust, Always Verify Security Platform")
 
@@ -18,6 +18,7 @@ app.include_router(system.router, prefix="/api/system", tags=["System Auditor"])
 app.include_router(analyze.router, prefix="/api/analyze", tags=["Threat Analysis Hall"])
 app.include_router(forensic.router, prefix="/api/forensic", tags=["Codec Lab"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin & Audit"])
+app.include_router(report.router, prefix="/api/report", tags=["Reporting"])
 
 @app.get("/health")
 async def health_check():

@@ -40,52 +40,59 @@ def legacy_gubun_parser(raw_data: str) -> str:
         
     return "".join(processed_parts)
 
-def decode_forensic_data(data_type: str, raw_data: str) -> Dict:
+def process_forensic_data(data_type: str, raw_data: str, action: str = "decode") -> Dict:
     """
-    포렌식 데이터를 디코딩하고 AI 설명을 생성합니다.
-    사용자가 제공한 레거시 알고리즘(Gubun, URL, Hex 등)을 포함합니다.
+    포렌식 데이터를 처리(인코딩/디코딩)하고 AI 설명을 생성합니다.
+    action: "decode" 또는 "encode"
     """
-    decoded_text = ""
+    processed_text = ""
     explanation = ""
     
     try:
-        if data_type == "base64":
-            # 표준 Base64 디코딩
-            decoded_text = base64.b64decode(raw_data).decode('utf-8', errors='replace')
-            explanation = "Base64 인코딩 뒤에 숨겨진 악성 페이로드나 C2 주소 유무를 확인하십시오."
-            
-        elif data_type == "url":
-            # URL 디코딩 (JS unescape/decodeURIComponent 모사)
-            decoded_text = urllib.parse.unquote_plus(raw_data)
-            explanation = "URL 인코딩된 문자열을 복구했습니다. % 헥스 코드 뒤에 숨은 난독화된 스크립트 패턴을 분석하십시오."
-            
-        elif data_type == "hex":
-            # Hex 디코딩 (JS decodeHex 모사)
-            clean_hex = re.sub(r'[^0-9a-fA-F]', '', raw_data)
-            decoded_text = bytes.fromhex(clean_hex).decode('utf-8', errors='replace')
-            explanation = "16진수 바이너리 데이터를 텍스트로 변환했습니다. 쉘코드 매직 넘버나 특징적인 문자열을 수색하십시오."
-            
-        elif data_type == "gubun":
-            # 사용자 제공 특수 파서 (gubun.js/URLTools.vbs 로직)
-            decoded_text = legacy_gubun_parser(raw_data)
-            explanation = "레거시 로그 파서(gubun1)를 통해 추출된 핵심 데이터입니다. 특정 오프셋의 값이 필터링된 결과이므로 무결성을 검증하십시오."
-            
-        elif data_type == "header":
-            decoded_text = raw_data
-            explanation = "이메일 헤더 분석 모드입니다. Received 필드의 IP 경로와 SPF/DKIM 결과치를 대조하십시오."
-            
-        else:
-            decoded_text = raw_data
-            explanation = "원본 데이터를 그대로 출력합니다. NTAV AI가 특이 패턴을 탐색 중입니다."
-            
+        if action == "decode":
+            if data_type == "base64":
+                processed_text = base64.b64decode(raw_data).decode('utf-8', errors='replace')
+                explanation = "Base64 인코딩 뒤에 숨겨진 악성 페이로드나 C2 주소 유무를 확인하십시오."
+            elif data_type == "url":
+                processed_text = urllib.parse.unquote_plus(raw_data)
+                explanation = "URL 인코딩된 문자열을 복구했습니다. % 헥스 코드 뒤에 숨은 난독화된 스크립트 패턴을 분석하십시오."
+            elif data_type == "hex":
+                clean_hex = re.sub(r'[^0-9a-fA-F]', '', raw_data)
+                processed_text = bytes.fromhex(clean_hex).decode('utf-8', errors='replace')
+                explanation = "16진수 바이너리 데이터를 텍스트로 변환했습니다. 쉘코드 매직 넘버나 특징적인 문자열을 수색하십시오."
+            elif data_type == "gubun":
+                processed_text = legacy_gubun_parser(raw_data)
+                explanation = "레거시 로그 파서(gubun1)를 통해 추출된 핵심 데이터입니다."
+            elif data_type == "header":
+                processed_text = raw_data
+                explanation = "이메일 헤더 분석 모드입니다. Received 필드의 IP 경로를 대조하십시오."
+            else:
+                processed_text = raw_data
+                explanation = "원본 데이터를 그대로 출력합니다."
+        
+        else: # action == "encode"
+            if data_type == "base64":
+                processed_text = base64.b64encode(raw_data.encode('utf-8')).decode('utf-8')
+                explanation = "데이터를 Base64로 인코딩했습니다. 통신 구간에서의 난독화나 데이터 보호 목적으로 사용될 수 있습니다."
+            elif data_type == "url":
+                processed_text = urllib.parse.quote_plus(raw_data)
+                explanation = "데이터를 URL 인코딩했습니다. HTTP 요청 파라미터로 안전하게 전달하기 위한 포맷입니다."
+            elif data_type == "hex":
+                processed_text = raw_data.encode('utf-8').hex()
+                explanation = "데이터를 16진수(Hex) 문자열로 변환했습니다. 바이너리 데이터의 가시성 확보 및 분석에 용이합니다."
+            else:
+                processed_text = raw_data
+                explanation = "해당 타입은 인코딩을 지원하지 않거나 원본을 유지합니다."
+
         return {
             "type": data_type,
-            "decoded": decoded_text,
+            "action": action,
+            "processed": processed_text,
             "ai_explanation": explanation,
             "status": "Success"
         }
     except Exception as e:
         return {
             "status": "Error",
-            "message": f"디코딩 실패: {str(e)}"
+            "message": f"처리 실패 ({action}): {str(e)}"
         }

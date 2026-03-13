@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, Activity, Lock, Search, FileText, Binary } from "lucide-react";
+import { Shield, Activity, Lock, Search, FileText, Binary, Settings } from "lucide-react";
 import SystemAuditor from "@/components/SystemAuditor";
 import ThreatAnalyzer from "@/components/ThreatAnalyzer";
 import CodecLab from "@/components/CodecLab";
+import AdminPanel from "@/components/AdminPanel";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -17,7 +18,8 @@ export default function Dashboard() {
           <h2 className="text-3xl font-bold">
             {activeTab === "dashboard" ? "보안 관제 대시보드" : 
              activeTab === "auditor" ? "시스템점검실 (Auditor)" : 
-             activeTab === "threat" ? "위협분석실 (Forensics)" : "코덱연구소 (Utility)"}
+             activeTab === "threat" ? "위협분석실 (Forensics)" : 
+             activeTab === "admin" ? "보안 감사 센터 (Admin)" : "코덱연구소 (Utility)"}
           </h2>
           <p className="text-zinc-400 mt-2">"Never Trust, Always Verify" - 모든 접근과 수정을 의심하십시오.</p>
         </div>
@@ -45,6 +47,12 @@ export default function Dashboard() {
              className={`px-4 py-2 rounded-lg text-sm transition-all ${activeTab === 'codec' ? 'bg-emerald-600 text-white' : 'bg-zinc-900 border border-white/10 text-zinc-400'}`}
            >
              연구소
+           </button>
+           <button 
+             onClick={() => setActiveTab("admin")}
+             className={`px-4 py-2 rounded-lg text-sm transition-all ${activeTab === 'admin' ? 'bg-purple-600 text-white' : 'bg-zinc-900 border border-white/10 text-zinc-400'}`}
+           >
+             감사
            </button>
         </div>
       </div>
@@ -128,11 +136,23 @@ export default function Dashboard() {
               </button>
             </section>
           </div>
+
+          {/* Admin Quick Link */}
+          <div className="mt-8">
+            <button 
+              onClick={() => setActiveTab("admin")}
+              className="glass w-full p-4 flex items-center justify-center gap-2 hover:bg-white/5 transition-all text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-purple-400"
+            >
+              <Settings size={14} /> 보안 감사 및 관리 패널 열기
+            </button>
+          </div>
         </>
       ) : activeTab === "auditor" ? (
         <SystemAuditor />
       ) : activeTab === "threat" ? (
         <ThreatAnalyzer />
+      ) : activeTab === "admin" ? (
+        <AdminPanel />
       ) : (
         <CodecLab />
       )}

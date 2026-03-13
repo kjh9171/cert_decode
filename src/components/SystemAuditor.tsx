@@ -65,9 +65,31 @@ export default function SystemAuditor() {
       {result && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* AI One-liner Section */}
-          <div className="bg-blue-900/20 border border-blue-500/30 p-6 rounded-xl">
-            <p className="text-xs text-blue-400 font-bold mb-1 tracking-widest uppercase">NTAV AI 한줄 평</p>
-            <h4 className="text-lg font-medium text-white italic">"{result.ntav_comment}"</h4>
+          <div className="bg-blue-900/20 border border-blue-500/30 p-6 rounded-xl flex justify-between items-center">
+            <div>
+              <p className="text-xs text-blue-400 font-bold mb-1 tracking-widest uppercase">NTAV AI 한줄 평</p>
+              <h4 className="text-lg font-medium text-white italic">"{result.ntav_comment}"</h4>
+            </div>
+            <button 
+              onClick={async () => {
+                const response = await fetch("/api/report/generate", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ ...result, type: "System Audit" }),
+                });
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `NTAV_Audit_Report_${new Date().getTime()}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+              }}
+              className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-blue-500/30 text-blue-400 rounded-lg text-xs font-bold transition-all flex items-center gap-2"
+            >
+              <Copy size={14} /> 리포트 다운로드
+            </button>
           </div>
 
           {/* Integrity Score Gauge */}

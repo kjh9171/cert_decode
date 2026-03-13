@@ -11,3 +11,4 @@ sqlalchemy
 psycopg2-binary
 python-dotenv
 aiofiles
+fpdf2
