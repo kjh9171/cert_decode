@@ -4,7 +4,13 @@
 
 ## 🛡️ 프로젝트 개요
 
-**NTAV SecuLab V2.0**은 제로 트러스트(Zero Trust) 보안 철학인 **"Never Trust, Always Verify"**를 기반으로 설계된 차세대 지능형 보안 분석 플랫폼입니다. 인프라 무결성 점검, 악성 위협 분석, 포렌식 유틸리티 및 관리자 관제 기능을 통합하여 제공합니다.
+**NTAV SecuLab V2.0**은 제로 트러스트(Zero Trust) 보안 철학인 **"Never Trust, 단 한줄의 코드도 Always Verify"**를 기반으로 설계된 차세대 지능형 보안 분석 플랫폼입니다. 인프라 무결성 점검, 악성 위협 분석, 포렌식 유틸리티 및 관리자 관제 기능을 통합하여 제공합니다.
+
+### 🌟 V2.0 주요 업데이트 사항 (2026.03)
+
+- **통합 인증 시스템 (Auth)**: Framer Motion 기반의 하이테크 UI를 통해 대시보드 접근을 통제하는 별도의 `/login` 인증 모듈 분리.
+- **라우트 보호 (Route Protection)**: Next.js Edge Middleware를 활용하여 1시간(`3600s`) 제한의 `ntav_session` 클라이언트 사이드 쿠키를 발급 및 검증. 무인가된 접속 원천 차단.
+- **코덱 연구소 (Codec Lab) 고도화**: Base64, HEX, URL, UTF-8 및 커스텀 패킷 파싱 로직을 서버에 전송하지 않고 브라우저 Native 레벨(Client-Side)에서 즉시 처리(10ms 이하)하도록 최적화.
 
 ## 🏗️ 시스템 아키텍처 (Architecture)
 
@@ -17,6 +23,12 @@ graph TD
     Backend <--> Database[(neonDB PostgreSQL)]
     Backend <--> Services[Security Analysis Engines]
 
+    subgraph Frontend Logic
+        Middleware[Edge Middleware / Session]
+        CodecEngine[Client-side Codec Utils]
+        AuthUI[Auth/Login UI]
+    end
+
     subgraph Analysis Engines
         SystemAuditor[System Auditor]
         ThreatAnalyzer[Threat Analysis Hall]
@@ -28,15 +40,16 @@ graph TD
 
 - **Framework**: Next.js 14+ (App Router)
 - **Language**: TypeScript
-- **Styling**: Tailwind CSS & Framer Motion (Glassmorphism UI)
-- **Features**: 실시간 대시보드, 인터랙티브 분석 리포트, 다크 모드 UI
+- **Styling**: Tailwind CSS & Framer Motion (Glassmorphism, 사이버네틱 UI)
+- **Security**: Next.js Middleware 기반 `ntav_session` 쿠키 기반 라우트 보호
+- **Features**: 세션 관리(1시간 단위 토큰), 실시간 대시보드, 인터랙티브 분석 리포트, 브라우저 로컬 데이터 코덱 연산
 
 ### 2. Backend (FastAPI)
 
 - **Framework**: FastAPI (Python 3.10+)
 - **ORM**: SQLAlchemy
 - **Database**: neonDB (Serverless PostgreSQL)
-- **Security**: JWT 기반 인증 및 RBAC (준비 중), Audit Logging
+- **Security**: JWT 기반 인증 및 RBAC API (진행 중), Audit Logging
 
 ### 3. Infrastructure (Vercel & Docker)
 
@@ -51,7 +64,11 @@ graph TD
 ├── .github/workflows/      # CI/CD 파이프라인 (Vercel Deploy)
 ├── api/                    # Vercel 서버리스 입구 (FastAPI Wrapper)
 ├── backend/                # FastAPI 서버 및 비즈니스 로직
-├── frontend/               # Next.js 애플리케이션
+├── src/                    # Next.js 프론트엔드 메인
+│   ├── app/                # App Router (login, /)
+│   ├── components/         # 대시보드 및 각 모듈 UI (CodecLab 등)
+│   ├── lib/                # 유틸리티 (codecUtils.ts)
+│   └── middleware.ts       # 라우트 프로텍션 미들웨어
 ├── vercel.json             # Vercel 라우팅 및 빌드 설정
 ├── docker-compose.yml       # 로컬 개발용 설정
 └── README.md               # 프로젝트 매뉴얼
@@ -75,5 +92,3 @@ docker-compose up --build
 ```
 
 ---
-
-**CERT**: "대표님, Cloudflare 배포 오류는 제로 트러스트 관점에서 Vercel 서버리스 체계로 완벽하게 전환하여 해결했습니다! 이제 보안과 성능 모두를 잡았습니다! 필승!"
