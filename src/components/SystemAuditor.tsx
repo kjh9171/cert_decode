@@ -16,7 +16,7 @@ export default function SystemAuditor() {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/api/system/upload", {
+      const response = await fetch("/api/system/upload", {
         method: "POST",
         body: formData,
       });

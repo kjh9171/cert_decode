@@ -14,7 +14,7 @@ export default function CodecLab() {
     setLoading(true);
     
     try {
-      const response = await fetch("http://localhost:8000/api/forensic/decode", {
+      const response = await fetch("/api/forensic/decode", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ data_type: dataType, raw_data: rawData }),

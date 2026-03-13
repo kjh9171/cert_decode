@@ -16,7 +16,7 @@ export default function ThreatAnalyzer() {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:8000/api/analyze/file", {
+      const response = await fetch("/api/analyze/file", {
         method: "POST",
         body: formData,
       });
