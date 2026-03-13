@@ -40,8 +40,8 @@ export default function CodecLab() {
         </p>
 
         <div className="space-y-4">
-          <div className="flex gap-4">
-            {["base64", "header", "raw"].map((type) => (
+          <div className="flex flex-wrap gap-4">
+            {["base64", "url", "hex", "gubun", "header", "raw"].map((type) => (
               <button
                 key={type}
                 onClick={() => setDataType(type)}
