@@ -4,7 +4,6 @@ uvicorn
 python-multipart
 pydantic
 paramiko
-hashlib
 pefile
 python-jose[cryptography]
 passlib[bcrypt]
