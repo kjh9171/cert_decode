@@ -37,8 +37,11 @@ export default function LoginPage() {
     // 보안 플랫폼 느낌을 주기 위한 지연 시간 (서버 통신 시뮬레이션)
     setTimeout(() => {
       setIsLoading(false);
-      // 실제 구현 시 여기서 JWT 토큰 발급 등 통신을 수행
-      // 인증 성공 시뮬레이션 후 메인 대시보드 강제 리다이렉션
+      // 실제 구현 시 여기서 API 통신 후 세션 토큰을 서버에서 받아와 Set-Cookie 하거나 아래처럼 처리
+      // "ntav_session" 이름으로 인증 쿠키를 발행 (유효기간 1시간 = 3600초)
+      document.cookie = `ntav_session=active_token_${Date.now()}; path=/; max-age=3600`;
+      
+      // 인증 성공 후 메인 대시보드 리다이렉션
       router.push('/');
     }, 1500);
   };

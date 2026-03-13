@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, Activity, Lock, Search, FileText, Binary, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Shield, Activity, Lock, Search, FileText, Binary, Settings, LogOut } from "lucide-react";
 import SystemAuditor from "@/components/SystemAuditor";
 import ThreatAnalyzer from "@/components/ThreatAnalyzer";
 import CodecLab from "@/components/CodecLab";
@@ -9,17 +10,31 @@ import AdminPanel from "@/components/AdminPanel";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // 세션 쿠키 수명 만료 처리로 삭제
+    document.cookie = "ntav_session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    router.push("/login");
+  };
 
   return (
     <div className="space-y-8">
       {/* Header section */}
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-3xl font-bold">
+          <h2 className="text-3xl font-bold flex items-center gap-3">
             {activeTab === "dashboard" ? "보안 관제 대시보드" : 
              activeTab === "auditor" ? "시스템점검실 (Auditor)" : 
              activeTab === "threat" ? "위협분석실 (Forensics)" : 
              activeTab === "admin" ? "보안 감사 센터 (Admin)" : "코덱연구소 (Utility)"}
+             <button 
+               onClick={handleLogout}
+               title="로그아웃"
+               className="ml-2 p-2 bg-zinc-900/50 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 rounded-full transition-colors border border-white/5"
+             >
+               <LogOut size={18} />
+             </button>
           </h2>
           <p className="text-zinc-400 mt-2">"Never Trust, Always Verify" - 모든 접근과 수정을 의심하십시오.</p>
         </div>
