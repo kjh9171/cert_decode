@@ -35,54 +35,37 @@ graph TD
 - **Database**: neonDB (Serverless PostgreSQL)
 - **Security**: JWT 기반 인증 및 RBAC (준비 중), Audit Logging
 
-### 3. Infrastructure (Docker)
-- **Docker Compose**: 전체 시스템을 한 번의 명령으로 구동할 수 있도록 컨테이너화
-- **Monitoring**: Prometheus & Grafana 연동 (확장 예정)
+### 3. Infrastructure (Vercel & Docker)
+- **Vercel**: 서버리스 애플리케이션으로 배포 (Next.js & FastAPI 기반)
+- **GitHub Actions**: Push 시 Vercel로 자동 배포되는 CI/CD 파이프라인 구축
+- **Docker Compose**: 로컬 개발 환경을 위해 컨테이너화 지원
 
 ## 📂 디렉토리 구조 (Directory Structure)
 
 ```text
 /
+├── .github/workflows/      # CI/CD 파이프라인 (Vercel Deploy)
+├── api/                    # Vercel 서버리스 입구 (FastAPI Wrapper)
 ├── backend/                # FastAPI 서버 및 비즈니스 로직
-│   ├── models/             # DB 스키마 및 데이터 모델
-│   ├── routes/             # API 엔드포인트 정의 (System, Analyze, Forensic, Admin)
-│   ├── services/           # 분석 엔진 로직 (Scoring, MITRE Mapping 등)
-│   └── main.py             # 백엔드 진입점
 ├── frontend/               # Next.js 애플리케이션
-│   ├── src/app/            # 페이지 및 레이아웃
-│   └── src/components/     # 재사용 가능한 UI 컴포넌트
-├── static/                 # 정적 리소스 및 레거시 자산
-├── docker-compose.yml       # 멀티 컨테이너 설정
-├── backend.Dockerfile       # 백엔드 빌드 명세
-└── README.md               # 프로젝트 매뉴얼 (현재 파일)
+├── vercel.json             # Vercel 라우팅 및 빌드 설정
+├── docker-compose.yml       # 로컬 개발용 설정
+└── README.md               # 프로젝트 매뉴얼
 ```
 
-## 🚀 주요 기능 (Key Features)
+## 🚀 배포 및 운영 (Deployment)
 
-| 메뉴 | 기능 설명 | 주요 기술 및 로직 |
-| :--- | :--- | :--- |
-| **시스템점검실** | `result.json` 기반 보안 취약점 점검 | AI 무결성 점수 산출, 필살 한줄 평 생성 |
-| **위협분석실** | 실행 파일(PE) 정밀 분석 | MITRE ATT&CK 매핑, 위험 API 탐지 |
-| **코덱연구소** | 데이터 디코딩 및 포렌식 분석 | Base64/헤더 디코딩, AI 분석 가이드 |
-| **Admin 관제** | 시스템 감사 로그 모니터링 | 모든 API 활동 및 이상 징후 추적 |
+### Vercel 자동 배포 (CI/CD)
+GitHub의 `main` 브랜치에 코드를 푸시하면 자동으로 Vercel에 배포됩니다. 이를 위해 다음 Secrets를 GitHub 레포지토리에 등록해야 합니다:
+1. `VERCEL_TOKEN`: Vercel 계정에서 생성한 토큰
+2. `VERCEL_ORG_ID`: Vercel 프로젝트의 Team ID 또는 User ID
+3. `VERCEL_PROJECT_ID`: Vercel 프로젝트 ID
 
-## 🛠️ 유지보수 및 운영 (Maintenance Guide)
-
-### 개발 환경 실행
+### 로컬 개발 환경 실행
 ```bash
 # Docker Compose를 이용한 전체 구동
 docker-compose up --build
 ```
 
-### 환경 변수 설정
-`.env` 파일에 다음 항목을 설정해야 합니다:
-- `DATABASE_URL`: neonDB 연결 스트링
-- `NEXT_PUBLIC_API_URL`: 백엔드 API 주소
-
-### 코드 기여 가이드
-- **Backend 수정**: `backend/services/` 내부의 분석 로직을 고도화할 수 있습니다.
-- **Frontend 수정**: `frontend/src/components/`에서 새로운 분석 모듈 UI를 추가할 수 있습니다.
-- 모든 코드 수정 시 한글 주석과 `README.md` 아키텍처 업데이트를 권장합니다.
-
 ---
-**CERT**: "대표님, 시스템은 최신 아키텍처로 무장되었습니다. 모든 보안 위협은 사전에 차단하겠습니다! 필승!"
+**CERT**: "대표님, Cloudflare 배포 오류는 제로 트러스트 관점에서 Vercel 서버리스 체계로 완벽하게 전환하여 해결했습니다! 이제 보안과 성능 모두를 잡았습니다! 필승!"
