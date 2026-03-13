@@ -38,6 +38,7 @@ def generate_scan_report(scan_data: dict) -> str:
     pdf.set_font('helvetica', '', 12)
     pdf.set_text_color(0, 0, 0)
     pdf.multi_cell(0, 8, f"Scan Type: {scan_data.get('type', 'Unknown').upper()}")
+    pdf.multi_cell(0, 8, f"Target Host: {scan_data.get('host', 'CentOS-Server')}")
     pdf.multi_cell(0, 8, f"Security Score: {scan_data.get('score', 0)} / 100")
     pdf.ln(5)
     
@@ -49,24 +50,38 @@ def generate_scan_report(scan_data: dict) -> str:
     
     # 상세 점검 내역 트리
     pdf.set_font('helvetica', 'B', 16)
+    pdf.set_text_color(30, 30, 60)
     pdf.cell(0, 10, '2. Detailed Audit Results', ln=True)
     pdf.ln(5)
     
     results = scan_data.get('results', [])
     for item in results:
         # 결과에 따른 색상 정의
-        if item.get('result') == 'Pass':
+        is_pass = item.get('result') == 'Pass' or item.get('result') == 'GOOD'
+        if is_pass:
             pdf.set_text_color(0, 150, 0) # Green for Pass
+            status_text = "[GOOD]"
         else:
             pdf.set_text_color(200, 0, 0) # Red for Fail
+            status_text = "[BAD]"
             
         pdf.set_font('helvetica', 'B', 12)
-        pdf.cell(0, 8, f"[{item.get('result', 'N/A')}] {item.get('title', 'Untitled Check')}", ln=True)
+        pdf.cell(0, 8, f"{status_text} {item.get('title', 'Untitled Check')}", ln=True)
         
         pdf.set_font('helvetica', '', 10)
         pdf.set_text_color(50, 50, 50)
         pdf.multi_cell(0, 6, f"Description: {item.get('desc', 'No description.')}")
         pdf.multi_cell(0, 6, f"Impact: {item.get('impact', 'Normal')}")
+        
+        if not is_pass:
+            pdf.set_font('helvetica', 'B', 9)
+            pdf.set_text_color(150, 0, 0)
+            pdf.multi_cell(0, 5, f"Cause: {item.get('cause', 'N/A')}")
+            pdf.set_text_color(150, 75, 0)
+            pdf.multi_cell(0, 5, f"Phenomenon: {item.get('phenom', 'N/A')}")
+            pdf.set_text_color(0, 100, 0)
+            pdf.multi_cell(0, 5, f"Solution: {item.get('solution', 'N/A')}")
+            
         pdf.ln(4)
     
     # 임시 디렉토리에 저장

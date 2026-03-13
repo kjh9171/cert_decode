@@ -37,7 +37,7 @@ export default function SystemAuditor() {
           Audit Log 분석기
         </h3>
         <p className="text-zinc-400 text-sm mb-6">
-          보안 점검 도구에서 생성된 `result.json` 파일을 드래그하거나 선택하여 NTAV AI 분석을 시작하십시오.
+          보안 점검 스크립트 실행 결과(`result.txt`) 또는 `result.json` 파일을 업로드하여 NTAV AI 포괄 분석을 시작하십시오.
         </p>
 
         <div className="flex items-center gap-4">
@@ -45,11 +45,11 @@ export default function SystemAuditor() {
             <input 
               type="file" 
               className="hidden" 
-              accept=".json"
+              accept=".json,.txt"
               onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
             <span className="text-zinc-500 text-sm">
-              {file ? file.name : "파일 선택 또는 드래그"}
+              {file ? file.name : "파일 선택 또는 드래그 (.json, .txt)"}
             </span>
           </label>
           <button 
@@ -131,21 +131,24 @@ export default function SystemAuditor() {
                   <th className="px-6 py-4 font-medium text-zinc-500 uppercase tracking-wider">점검 사항</th>
                   <th className="px-6 py-4 font-medium text-zinc-500 uppercase tracking-wider">결과</th>
                   <th className="px-6 py-4 font-medium text-zinc-500 uppercase tracking-wider">중요도</th>
-                  <th className="px-6 py-4 font-medium text-zinc-500 uppercase tracking-wider">조치 가이드</th>
+                  <th className="px-6 py-4 font-medium text-zinc-500 uppercase tracking-wider">상세 분석 및 조치</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {result.results.map((item: any, idx: number) => (
-                  <tr key={idx} className="hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4 font-medium">{item.title}</td>
+                  <tr key={idx} className="hover:bg-white/5 transition-colors group">
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-zinc-200">{item.title}</div>
+                      <div className="text-[10px] text-zinc-500 mt-0.5 font-mono">{item.id}</div>
+                    </td>
                     <td className="px-6 py-4">
                       {item.result === "Pass" ? (
-                        <span className="text-emerald-500 flex items-center gap-1">
-                          <CheckCircle2 size={14} /> Pass
+                        <span className="text-emerald-500 flex items-center gap-1 font-bold">
+                          <CheckCircle2 size={14} /> GOOD
                         </span>
                       ) : (
-                        <span className="text-red-500 flex items-center gap-1">
-                          <XCircle size={14} /> Fail
+                        <span className="text-red-500 flex items-center gap-1 font-bold">
+                          <XCircle size={14} /> BAD
                         </span>
                       )}
                     </td>
@@ -158,15 +161,16 @@ export default function SystemAuditor() {
                         {item.impact}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <span className="truncate max-w-[200px] text-zinc-400 italic text-xs">{item.desc}</span>
-                        {item.snippet && (
-                           <button className="p-1 hover:bg-zinc-800 rounded text-blue-400" title="가이드 코드 복사">
-                             <Copy size={12} />
-                           </button>
-                        )}
-                      </div>
+                    <td className="px-6 py-4 space-y-2 max-w-md">
+                      {item.result === "Fail" ? (
+                        <div className="space-y-1.5 p-3 bg-red-500/5 rounded-lg border border-red-500/10">
+                          <div className="text-[11px] text-red-300 leading-relaxed"><span className="font-bold text-red-500 mr-1">[원인]</span> {item.cause}</div>
+                          <div className="text-[11px] text-amber-300 leading-relaxed"><span className="font-bold text-amber-500 mr-1">[현상]</span> {item.phenom}</div>
+                          <div className="text-[11px] text-emerald-300 leading-relaxed"><span className="font-bold text-emerald-500 mr-1">[대책]</span> {item.solution}</div>
+                        </div>
+                      ) : (
+                        <span className="text-zinc-500 text-xs italic">{item.desc || "기준 준수 중"}</span>
+                      )}
                     </td>
                   </tr>
                 ))}
